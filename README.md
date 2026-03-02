@@ -1,2 +1,1 @@
-# wdio-xbridge
-
+# wdio-xbridge-service

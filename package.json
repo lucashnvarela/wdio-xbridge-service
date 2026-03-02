@@ -1,0 +1,31 @@
+{
+  "name": "wdio-xbridge-service",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "homepage": "",
+  "license": "MIT",
+  "repository": {},
+  "keywords": [
+    "webdriverio",
+    "wdio",
+    "wdio-service"
+  ],
+  "main": "index.js",
+  "type": "module",
+  "module": "./build/index.js",
+  "engines": {
+    "node": "^16.13 || >=18"
+  },
+  "scripts": {
+  },
+  "peerDependencies": {
+    "@wdio/types": "^9.0.0",
+    "webdriverio": "^9.0.0"
+  },
+  "devDependencies": {
+    "@wdio/globals": "^9.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
