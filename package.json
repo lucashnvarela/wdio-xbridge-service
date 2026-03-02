@@ -2,22 +2,24 @@
   "name": "wdio-xbridge-service",
   "version": "1.0.0",
   "description": "",
-  "author": "",
-  "homepage": "",
+  "author": "lucas.varela",
+  "homepage": "https://github.com/lucashnvarela/wdio-xbridge-service#readme",
   "license": "MIT",
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucashnvarela/wdio-xbridge-service.git"
+  },
   "keywords": [
     "webdriverio",
     "wdio",
     "wdio-service"
   ],
-  "main": "index.js",
   "type": "module",
-  "module": "./build/index.js",
-  "engines": {
-    "node": "^16.13 || >=18"
-  },
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf ./build"
   },
   "peerDependencies": {
     "@wdio/types": "^9.0.0",
