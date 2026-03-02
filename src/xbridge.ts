@@ -12,7 +12,7 @@ import {
   NavigationParams,
   SelectorParams,
   Exception,
-} from "./types.js"
+} from "./types"
 
 class XBridgeServiceError extends Error {
   constructor(err: { name: Exception, message: string }) {

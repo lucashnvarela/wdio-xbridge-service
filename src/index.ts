@@ -1,5 +1,5 @@
-import XBridgeService from "./service.js"
-import { XBridge } from "./xbridge.js"
+import XBridgeService from "./service"
+import { XBridge } from "./xbridge"
 
 export default XBridgeService
 export { XBridge }

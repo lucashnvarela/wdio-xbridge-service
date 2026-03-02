@@ -1,5 +1,5 @@
-import type { Capabilities, Options, Services } from "@wdio/types"
-import { XBridge } from "./xbridge.js"
+import type { Capabilities, Options, Services } from "@wdio/types" with { "resolution-mode": "import" }
+import { XBridge } from "./xbridge"
 
 export default class XBridgeService implements Services.ServiceInstance {
   constructor(
