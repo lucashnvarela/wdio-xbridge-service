@@ -8,11 +8,12 @@
     ],
     "outDir": "./build",
     "strict": true,
+    "esModuleInterop": true,
     "declaration": true,
     "skipLibCheck": true,
     "types": [
       "node",
-      "@wdio/globals/types",
+      "@wdio/globals/types"
     ],
   },
   "include": [

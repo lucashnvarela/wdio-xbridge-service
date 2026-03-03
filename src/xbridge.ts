@@ -86,7 +86,7 @@ class XBridgeServiceError extends Error {
   }
 }
 
-export function verifySuportedPlatform(platformName: string) {
+export function verifySupportedPlatform(platformName: string) {
   if (!Object.values<string>(PlatformName).includes(platformName)) {
     throw new XBridgeServiceError({
       name: Exception.UnknownPlatform,

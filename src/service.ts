@@ -1,25 +1,27 @@
-import type { Capabilities, Options, Services } from "@wdio/types" with { "resolution-mode": "import" }
+import type { Capabilities, Services } from "@wdio/types" with { "resolution-mode": "import" }
 import logger from "@wdio/logger"
-import { XBridge, verifySuportedPlatform } from "./xbridge"
+import { XBridge, verifySupportedPlatform } from "./xbridge"
 
 const log = logger("wdio-xbridge-service")
 
 export default class XBridgeService implements Services.ServiceInstance {
+  private platformName: string
+
   constructor(
-    public options?: Services.ServiceOption,
-    public capabilities?: Capabilities.ResolvedTestrunnerCapabilities,
-    public config?: Options.WebdriverIO,
-  ) {}
+    _options: never,
+    capabilities: Capabilities.AppiumCapabilities,
+    _config: never,
+  ) {
+    this.platformName = capabilities?.["appium:platformName"] ?? "*unknown*"
+    verifySupportedPlatform(this.platformName)
+  }
 
   async before(
-    capabilities: Capabilities.RequestedStandaloneCapabilities,
-    specs: string[],
+    _capabilities: never,
+    _specs: never,
     browser: WebdriverIO.Browser,
   ) {
-    const platformName = capabilities
-    verifySuportedPlatform(platformName)
-
     browser.X = XBridge
-    log.info(`Service registered for ${platformName} session`)
+    log.info(`Service registered for ${this.platformName} session`)
   }
 }
