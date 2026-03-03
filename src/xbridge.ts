@@ -5,16 +5,35 @@ enum PlatformName {
   Android = "Android",
 }
 
-export enum IOSNodeType {
-  Text = "StaticText",
-  Button = "Button",
-  Input = "TextField",
+enum IOSNodeType {
+  text = "StaticText",
+  button = "Button",
+  switch = "Switch",
+  link = "Link",
+  input = "TextField",
+  textarea = "TextView",
+  secureinput = "SecureTextField",
+  image = "Image",
+  window = "Window",
+  cell = "Cell",
+  webview = "WebView",
+  collectionview = "CollectionView",
+  scrollview = "ScrollView",
+  other = "Other",
 }
 
-export enum AndroidNodeType {
-  Text = "widget.TextView",
-  Button = "widget.Button",
-  Input = "widget.EditText",
+enum AndroidNodeType {
+  text = "widget.TextView",
+  button = "widget.Button",
+  input = "widget.EditText",
+  image = "widget.Image",
+  imagebutton = "widget.ImageButton",
+  imageview = "widget.ImageView",
+  frame = "widget.FrameLayout",
+  linear = "widget.LinearLayout",
+  webview = "widget.WebView",
+  scrollview = "widget.ScrollView",
+  view = "view.View",
 }
 
 enum NavigationAxis {
@@ -35,7 +54,7 @@ interface IOSAttr {
   labelContains?: string
   value?: string
   name?: string
-  type?: `${IOSNodeType}`
+  type?: keyof typeof IOSNodeType
 }
 
 enum IOSPredicates {
@@ -50,7 +69,7 @@ interface AndroidAttr {
   text?: string
   textContains?: string
   description?: string
-  class?: AndroidNodeType
+  class?: keyof typeof AndroidNodeType
 }
 
 enum AndroidPredicates {
@@ -111,7 +130,7 @@ class XPathConstructur {
 
     for (const [attribute, value] of Object.entries(attributes)) {
       if (value !== undefined) {
-        this.parseAttr(attribute, value as string)
+        this.parseAttr(attribute, value)
       }
     }
 
@@ -187,7 +206,7 @@ class XPathConstructur {
         if (this.isIOSAttr(attr)) {
           if (this.isNodeAttr(attr)) {
             this.assertIOSNodeType(val)
-            this.node = `XCUIElementType${val}`
+            this.node = `XCUIElementType${IOSNodeType[val]}`
             break
           }
           const predicatePattern = IOSPredicates[attr]
@@ -199,7 +218,7 @@ class XPathConstructur {
         if (this.isAndroidAttr(attr)) {
           if (this.isNodeAttr(attr)) {
             this.assertAndroidNodeType(val)
-            this.node = `android.${val}`
+            this.node = `android.${AndroidNodeType[val]}`
             break
           }
           const predicatePattern = AndroidPredicates[attr]
@@ -222,26 +241,20 @@ class XPathConstructur {
     return ["type", "class"].includes(attr)
   }
 
-  private assertIOSNodeType(val: string): asserts val is IOSNodeType {
-    const nodeType = val as IOSNodeType
-
-    if (Object.values(IOSNodeType).includes(nodeType)) {
+  private assertIOSNodeType(val: string): asserts val is keyof typeof IOSNodeType {
+    if (Object.keys(IOSNodeType).includes(val)) {
       return
     }
-
     throw new XBridgeServiceError({
       name: Exception.InvalidAttribute,
       message: `Invalid iOS node type: "${val}". Expected one of [${Object.keys(IOSNodeType).join(", ")}].`,
     })
   }
 
-  private assertAndroidNodeType(val: string): asserts val is AndroidNodeType {
-    const nodeType = val as AndroidNodeType
-
-    if (Object.values(AndroidNodeType).includes(nodeType)) {
+  private assertAndroidNodeType(val: string): asserts val is keyof typeof AndroidNodeType {
+    if (Object.keys(AndroidNodeType).includes(val)) {
       return
     }
-
     throw new XBridgeServiceError({
       name: Exception.InvalidAttribute,
       message: `Invalid Android node type: "${val}". Expected one of [${Object.keys(AndroidNodeType).join(", ")}].`,
