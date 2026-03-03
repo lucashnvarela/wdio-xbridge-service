@@ -21,6 +21,15 @@ class XBridgeServiceError extends Error {
   }
 }
 
+export function verifySuportedPlatform(platformName: string) {
+  if (!Object.values<string>(PlatformName).includes(platformName)) {
+    throw new XBridgeServiceError({
+      name: Exception.UnknownPlatform,
+      message: "Current platform is not supported.",
+    })
+  }
+}
+
 class XPathConstructur {
   private INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/
 
@@ -127,7 +136,7 @@ class XPathConstructur {
           const predicate = predicatePattern.replace("*value*", val)
           this.predicates.push(predicate)
         }
-        return
+        break
       case PlatformName.Android:
         if (this.isAndroidAttr(attr)) {
           if (this.isNodeAttr(attr)) {
@@ -139,12 +148,8 @@ class XPathConstructur {
           const predicate = predicatePattern.replace("*value*", val)
           this.predicates.push(predicate)
         }
-        return
+        break
     }
-    throw new XBridgeServiceError({
-      name: Exception.UnknownPlatform,
-      message: "Current platform is not supported.",
-    })
   }
 
   private isIOSAttr(attr: string): attr is keyof typeof IOSPredicates | "type" {

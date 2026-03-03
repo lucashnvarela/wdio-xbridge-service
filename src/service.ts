@@ -1,5 +1,5 @@
 import type { Capabilities, Options, Services } from "@wdio/types" with { "resolution-mode": "import" }
-import { XBridge } from "./xbridge"
+import { XBridge, verifySuportedPlatform } from "./xbridge"
 
 export default class XBridgeService implements Services.ServiceInstance {
   constructor(
@@ -13,6 +13,9 @@ export default class XBridgeService implements Services.ServiceInstance {
     specs: string[],
     browser: WebdriverIO.Browser,
   ) {
+    const platformName = capabilities
+    verifySuportedPlatform(platformName)
+
     browser.X = XBridge
   }
 }
