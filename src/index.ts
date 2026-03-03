@@ -1,8 +1,8 @@
 import XBridgeService from "./service"
-import { XBridge } from "./xbridge"
+import { XBridge, IOSNodeType, AndroidNodeType } from "./xbridge"
 
 export default XBridgeService
-export { XBridge }
+export { XBridge, IOSNodeType, AndroidNodeType }
 
 declare global {
   namespace WebdriverIO {

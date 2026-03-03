@@ -1,18 +1,80 @@
-import {
-  PlatformName,
-  AndroidAttr,
-  AndroidElementClass,
-  AndroidNodeType,
-  AndroidPredicates,
-  IOSAttr,
-  XCUIElementType,
-  IOSNodeType,
-  IOSPredicates,
-  NavigationAxis,
-  NavigationParams,
-  SelectorParams,
-  Exception,
-} from "./types"
+enum PlatformName {
+  iOS = "iOS",
+  Android = "Android",
+}
+
+export enum IOSNodeType {
+  Text = "StaticText",
+  Button = "Button",
+  Input = "TextField",
+}
+
+export enum AndroidNodeType {
+  Text = "widget.TextView",
+  Button = "widget.Button",
+  Input = "widget.EditText",
+}
+
+enum NavigationAxis {
+  Ancestor = "/ancestor::",
+  Descendant = "/descendant::",
+  Parent = "/parent::",
+  Child = "/child::",
+  Preceding = "/preceding-sibling::",
+  Following = "/following-sibling::",
+}
+
+type XCUIElementType = `XCUIElementType${IOSNodeType}`
+
+type AndroidElementClass = `android.${AndroidNodeType}`
+
+interface IOSAttr {
+  label?: string
+  labelContains?: string
+  value?: string
+  name?: string
+  type?: `${IOSNodeType}`
+}
+
+enum IOSPredicates {
+  label = '[@label="*value*"]',
+  labelContains = '[contains(@label, "*value*")]',
+  value = '[@value="*value*"]',
+  name = '[@name="*value*"]',
+}
+
+interface AndroidAttr {
+  resourceId?: string
+  text?: string
+  textContains?: string
+  description?: string
+  class?: AndroidNodeType
+}
+
+enum AndroidPredicates {
+  resourceId = '[@resource-id="*value*"]',
+  text = '[@text="*value*"]',
+  textContains = '[contains(@text, "*value*")]',
+  description = '[@content-desc="*value*"]',
+}
+
+interface NavigationParams extends IOSAttr, AndroidAttr {
+  position?: number
+}
+
+interface SelectorParams extends NavigationParams {
+  context?: string
+  axis?: NavigationAxis
+}
+
+enum Exception {
+  ContextNotFound = "ContextNotFoundError",
+  RequiredAttribute = "RequiredAttributeError",
+  UnknownPlatform = "UnknownPlatformError",
+  InvalidAttribute = "InvalidAttributeError",
+  InvalidNodeType = "InvalidNodeTypeError",
+  NotDisplayedAfterSwipe = "NotDisplayedAfterSwipe",
+}
 
 class XBridgeServiceError extends Error {
   constructor(err: { name: Exception, message: string }) {
