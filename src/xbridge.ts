@@ -1,3 +1,5 @@
+import logger from "@wdio/logger"
+
 enum PlatformName {
   iOS = "iOS",
   Android = "Android",
@@ -68,17 +70,18 @@ interface SelectorParams extends NavigationParams {
 }
 
 enum Exception {
-  ContextNotFound = "ContextNotFoundError",
-  RequiredAttribute = "RequiredAttributeError",
+  AttributeRequired = "AttributeRequiredError",
   UnknownPlatform = "UnknownPlatformError",
   InvalidAttribute = "InvalidAttributeError",
-  InvalidNodeType = "InvalidNodeTypeError",
-  NotDisplayedAfterSwipe = "NotDisplayedAfterSwipe",
+  NotDisplayedAfterSwipe = "NotDisplayedAfterSwipeError",
 }
+
+const log = logger("wdio-xbridge-service")
 
 class XBridgeServiceError extends Error {
   constructor(err: { name: Exception, message: string }) {
-    super(`[wdio-xbridge-service]: ${err.message}`)
+    log.error(err.message)
+    super(err.message)
     this.name = err.name
   }
 }
@@ -87,7 +90,7 @@ export function verifySuportedPlatform(platformName: string) {
   if (!Object.values<string>(PlatformName).includes(platformName)) {
     throw new XBridgeServiceError({
       name: Exception.UnknownPlatform,
-      message: "Current platform is not supported.",
+      message: `Unsupported platform: "${platformName}". Expected one of [${Object.keys(PlatformName).join(", ")}].`,
     })
   }
 }
@@ -106,13 +109,6 @@ class XPathConstructur {
     this.context = context
     this.axis = axis
 
-    if (this.isRoot && this.hasNavigation) {
-      throw new XBridgeServiceError({
-        name: Exception.ContextNotFound,
-        message: "No starting point was provided for the navigation.",
-      })
-    }
-
     for (const [attribute, value] of Object.entries(attributes)) {
       if (value !== undefined) {
         this.parseAttr(attribute, value as string)
@@ -123,8 +119,8 @@ class XPathConstructur {
 
     if (this.isRoot && !this.predicates.length && this.isAnyNodeType) {
       throw new XBridgeServiceError({
-        name: Exception.RequiredAttribute,
-        message: "No attributes were specified for the current platform."
+        name: Exception.AttributeRequired,
+        message: "At least one attribute must be specified to build a valid selector."
       })
     }
   }
@@ -181,7 +177,7 @@ class XPathConstructur {
     }
     throw new XBridgeServiceError({
       name: Exception.InvalidAttribute,
-      message: `The provided value for 'position' "${val} is invalid.`,
+      message: `Invalid postion value: "${val}". Expected a number >= -1.`,
     })
   }
 
@@ -234,8 +230,8 @@ class XPathConstructur {
     }
 
     throw new XBridgeServiceError({
-      name: Exception.InvalidNodeType,
-      message: `The provided value for 'type' "${val}" is invalid.`
+      name: Exception.InvalidAttribute,
+      message: `Invalid iOS node type: "${val}". Expected one of [${Object.keys(IOSNodeType).join(", ")}].`,
     })
   }
 
@@ -247,8 +243,8 @@ class XPathConstructur {
     }
 
     throw new XBridgeServiceError({
-      name: Exception.InvalidNodeType,
-      message: `The provided value for 'class' "${val}" is invalid.`
+      name: Exception.InvalidAttribute,
+      message: `Invalid Android node type: "${val}". Expected one of [${Object.keys(AndroidNodeType).join(", ")}].`,
     })
   }
 
@@ -273,6 +269,7 @@ class Element {
   private swipeEnabled: boolean = false
 
   constructor(selector: string) {
+    log.debug(`[Locator.constructor] Selector: ${selector}`)
     this.selector = selector
   }
 
@@ -297,7 +294,9 @@ class Element {
 
     const windowSize = await driver.getWindowSize()
 
+    log.info("Element not in viewport, attempting to swipe into view")
     for (let attempts = 1; attempts <= MAX_SWIPE_ATTEMPTS; attempts++) {
+      log.debug(`[Locator.swipe] Attempt ${attempts}/${MAX_SWIPE_ATTEMPTS}`)
       await driver.swipe({
         direction: SWIPE_DIRECTION,
         duration: SWIPE_DURATION,
@@ -310,15 +309,15 @@ class Element {
           y: windowSize.height * 0.1,
         }
       })
-
       if (await $(this.selector).isDisplayed()) {
+        log.info("Element brought into view")
         return
       }
     }
 
     throw new XBridgeServiceError({
       name: Exception.NotDisplayedAfterSwipe,
-      message: "Element could not be brought into view via swipe.",
+      message: `Element not found after ${MAX_SWIPE_ATTEMPTS} swipe attempts.`,
     })
   }
 
@@ -358,6 +357,7 @@ class Element {
       ...params,
     })
     this.selector = xpath.selector
+    log.debug(`[Locator.ancestor] Selector: ${this.selector}`)
     return this
   }
 
@@ -371,6 +371,7 @@ class Element {
       ...params,
     })
     this.selector = xpath.selector
+    log.debug(`[Locator.descendant] Selector: ${this.selector}`)
     return this
   }
 
@@ -384,6 +385,7 @@ class Element {
       ...params,
     })
     this.selector = xpath.selector
+    log.debug(`[Locator.parent] Selector: ${this.selector}`)
     return this
   }
 
@@ -397,6 +399,7 @@ class Element {
       ...params,
     })
     this.selector = xpath.selector
+    log.debug(`[Locator.child] Selector: ${this.selector}`)
     return this
   }
 
@@ -410,6 +413,7 @@ class Element {
       ...params,
     })
     this.selector = xpath.selector
+    log.debug(`[Locator.previous] Selector: ${this.selector}`)
     return this
   }
 
@@ -423,6 +427,7 @@ class Element {
       ...params,
     })
     this.selector = xpath.selector
+    log.debug(`[Locator.next] Selector: ${this.selector}`)
     return this
   }
 }
