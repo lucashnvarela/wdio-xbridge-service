@@ -1,6 +1,6 @@
 {
   "name": "wdio-xbridge-service",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "",
   "author": "lucas.varela",
   "homepage": "https://github.com/lucashnvarela/wdio-xbridge-service#readme",
@@ -14,7 +14,6 @@
     "wdio",
     "wdio-service"
   ],
-  "packageManager": "pnpm@10.12.4",
   "type": "module",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -23,16 +22,18 @@
     "clean": "rm -rf ./build"
   },
   "engines": {
-    "pnpm": ">=8.15.3"
+    "node": ">=20",
+    "pnpm": ">=10"
   },
   "peerDependencies": {
     "@wdio/types": "^9.0.0",
     "webdriverio": "^9.0.0"
   },
   "devDependencies": {
-    "@wdio/globals": "^9.0.0",
-    "@wdio/logger": "^9.0.0",
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^25.3.3",
+    "@wdio/globals": "^9.23.0",
+    "@wdio/logger": "^9.18.0",
+    "semantic-release": "^25.0.3",
+    "typescript": "^5.9.3"
   }
 }
