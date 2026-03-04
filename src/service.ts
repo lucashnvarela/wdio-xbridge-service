@@ -1,4 +1,4 @@
-import type { Capabilities, Services } from "@wdio/types" with { "resolution-mode": "import" }
+import type { Services } from "@wdio/types" with { "resolution-mode": "import" }
 import logger from "@wdio/logger"
 import { XBridge, verifySupportedPlatform } from "./xbridge"
 
@@ -9,10 +9,10 @@ export default class XBridgeService implements Services.ServiceInstance {
 
   constructor(
     _options: never,
-    capabilities: Capabilities.AppiumCapabilities,
+    capabilities: WebdriverIO.Capabilities,
     _config: never,
   ) {
-    this.platformName = capabilities?.["appium:platformName"] ?? "*unknown*"
+    this.platformName = capabilities.platformName || capabilities["appium:platformName"] || "*unknown*"
     verifySupportedPlatform(this.platformName)
   }
 
