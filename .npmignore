@@ -1,6 +1,7 @@
 src
 tsconfig.json
 pnpm-lock.yaml
+.releaserc
 node_modules
 .git
 .gitignore
