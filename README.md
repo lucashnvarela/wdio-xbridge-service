@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/wdio-xbridge-service.svg)](https://www.npmjs.com/package/wdio-xbridge-service)
 
-WebdriverIO service with a cross-platform XPath query API to locate and interact with native iOS and Android UI elements.
+A WebdriverIO service with a cross-platform XPath query API to locate and interact with native iOS and Android UI elements.
 
 ## Installation
 

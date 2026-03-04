@@ -114,7 +114,7 @@ export function verifySupportedPlatform(platformName: string) {
   }
 }
 
-class XPathConstructur {
+class XPathConstructor {
   private INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/
 
   private _context?: string
@@ -196,7 +196,7 @@ class XPathConstructur {
     }
     throw new XBridgeServiceError({
       name: Exception.InvalidAttribute,
-      message: `Invalid postion value: "${val}". Expected a number >= -1.`,
+      message: `Invalid position value: "${val}". Expected a number >= -1.`,
     })
   }
 
@@ -276,7 +276,7 @@ class XPathConstructur {
   }
 }
 
-class Element {
+class Locator {
   private selector: string
   private platformScope?: PlatformName
   private swipeEnabled: boolean = false
@@ -334,118 +334,119 @@ class Element {
     })
   }
 
-  get ios(): Element {
+  get ios(): Locator {
     this.platformScope = PlatformName.iOS
     return this
   }
 
-  get android(): Element {
+  get android(): Locator {
     this.platformScope = PlatformName.Android
     return this
   }
 
-  get swipe(): Element {
+  get swipe(): Locator {
     this.swipeEnabled = true
     return this
   }
 
-  async find(index: number = 1): Promise<WebdriverIO.Element> {
-    this.selector = `(${this.selector})[${index}]`
+  async click(): Promise<void> {
     await this.swipeMotion()
-    return await $(this.selector).getElement()
+    log.debug("[Locator.click]")
+    await $(this.selector).click()
   }
 
-  async findAll(): Promise<WebdriverIO.ElementArray> {
+  async fill(val: string): Promise<void> {
     await this.swipeMotion()
-    return await $$(this.selector).getElements()
+    log.debug(`[Locator.fill] Value: "${val}"`)
+    await $(this.selector).setValue(val)
   }
 
-  ancestor(params?: NavigationParams): Element {
+  ancestor(params?: NavigationParams): Locator {
     if (!this.scopeCheck()) {
       return this
     }
-    const xpath = new XPathConstructur({
+    const xpath = new XPathConstructor({
       context: this.selector,
       axis: NavigationAxis.Ancestor,
       ...params,
     })
     this.selector = xpath.selector
-    log.debug(`[Locator.ancestor] Selector: ${this.selector}`)
+    log.debug(`[Locator.ancestor] Selector: "${this.selector}"`)
     return this
   }
 
-  descendant(params?: NavigationParams): Element {
+  descendant(params?: NavigationParams): Locator {
     if (!this.scopeCheck()) {
       return this
     }
-    const xpath = new XPathConstructur({
+    const xpath = new XPathConstructor({
       context: this.selector,
       axis: NavigationAxis.Descendant,
       ...params,
     })
     this.selector = xpath.selector
-    log.debug(`[Locator.descendant] Selector: ${this.selector}`)
+    log.debug(`[Locator.descendant] Selector: "${this.selector}"`)
     return this
   }
 
-  parent(params?: NavigationParams): Element {
+  parent(params?: NavigationParams): Locator {
     if (!this.scopeCheck()) {
       return this
     }
-    const xpath = new XPathConstructur({
+    const xpath = new XPathConstructor({
       context: this.selector,
       axis: NavigationAxis.Parent,
       ...params,
     })
     this.selector = xpath.selector
-    log.debug(`[Locator.parent] Selector: ${this.selector}`)
+    log.debug(`[Locator.parent] Selector: "${this.selector}"`)
     return this
   }
 
-  child(params?: NavigationParams): Element {
+  child(params?: NavigationParams): Locator {
     if (!this.scopeCheck()) {
       return this
     }
-    const xpath = new XPathConstructur({
+    const xpath = new XPathConstructor({
       context: this.selector,
       axis: NavigationAxis.Child,
       ...params,
     })
     this.selector = xpath.selector
-    log.debug(`[Locator.child] Selector: ${this.selector}`)
+    log.debug(`[Locator.child] Selector: "${this.selector}"`)
     return this
   }
 
-  previous(params?: NavigationParams): Element {
+  previous(params?: NavigationParams): Locator {
     if (!this.scopeCheck()) {
       return this
     }
-    const xpath = new XPathConstructur({
+    const xpath = new XPathConstructor({
       context: this.selector,
       axis: NavigationAxis.Preceding,
       ...params,
     })
     this.selector = xpath.selector
-    log.debug(`[Locator.previous] Selector: ${this.selector}`)
+    log.debug(`[Locator.previous] Selector: "${this.selector}"`)
     return this
   }
 
-  next(params?: NavigationParams): Element {
+  next(params?: NavigationParams): Locator {
     if (!this.scopeCheck()) {
       return this
     }
-    const xpath = new XPathConstructur({
+    const xpath = new XPathConstructor({
       context: this.selector,
       axis: NavigationAxis.Following,
       ...params,
     })
     this.selector = xpath.selector
-    log.debug(`[Locator.next] Selector: ${this.selector}`)
+    log.debug(`[Locator.next] Selector: "${this.selector}"`)
     return this
   }
 }
 
-export function XBridge(attrs: IOSAttr & AndroidAttr): Element {
-  const xpath = new XPathConstructur(attrs)
-  return new Element(xpath.selector)
+export function XBridge(attrs: IOSAttr & AndroidAttr): Locator {
+  const xpath = new XPathConstructor(attrs)
+  return new Locator(xpath.selector)
 }
