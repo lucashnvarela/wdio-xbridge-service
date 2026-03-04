@@ -12,7 +12,7 @@ export default class XBridgeService implements Services.ServiceInstance {
     capabilities: WebdriverIO.Capabilities,
     _config: never,
   ) {
-    this.platformName = capabilities.platformName || capabilities["appium:platformName"] || "*unknown*"
+    this.platformName = capabilities.platformName || capabilities["appium:platformName"] || capabilities["bstack:options"]?.platformName || "*unknown*"
     verifySupportedPlatform(this.platformName)
   }
 

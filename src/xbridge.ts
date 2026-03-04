@@ -115,13 +115,13 @@ export function verifySupportedPlatform(platformName: string) {
 }
 
 class XPathConstructor {
-  private INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/
+  private readonly INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/
 
   private _context?: string
   private _position?: `[${number}]` | "[last()]"
 
   axis?: NavigationAxis
-  node!: XCUIElementType | AndroidElementClass
+  node?: XCUIElementType | AndroidElementClass
   predicates: string[] = []
 
   constructor({ context, axis, position, ...attributes }: SelectorParams) {
