@@ -112,8 +112,8 @@ export function verifySupportedPlatform(platformName: string) {
 
 export class XPathConstructor {
 	private readonly INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/;
-	private readonly SELECTOR_PATTERN = /^(?<attr>\w+)=['"](?<value>[\w\s]+)['"]$/;
-	private readonly NODE_SELECTOR_PATTERN = /^(?<node>\w+)?\[(?<attr>\w+)=['"](?<value>[\w\s]+)['"]\]$/;
+	private readonly SELECTOR_PATTERN = /^(?<attr>\w+)=['"](?<value>.+)['"]$/;
+	private readonly NODE_SELECTOR_PATTERN = /^(?<node>\w+)?\[(?<attr>\w+)=['"](?<value>.+)['"]\]$/;
 	private readonly BOTH_SELECTOR_PATTERN = new RegExp(
 		`^${this.SELECTOR_PATTERN.source}|${this.NODE_SELECTOR_PATTERN.source}$`,
 	);
