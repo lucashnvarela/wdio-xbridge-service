@@ -1,9 +1,7 @@
-name: CI
+name: Compile
 
 on:
   pull_request:
-    branches:
-      - '**'
 
 jobs:
   build:
@@ -18,4 +16,5 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install
-      - run: pnpm run build
+      - run: pnpm run lint
+      - run: pnpm run test
