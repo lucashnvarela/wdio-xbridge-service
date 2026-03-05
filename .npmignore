@@ -1,8 +1,11 @@
 src
-tests
 tsconfig.json
+biome.json
+tests
+vitest.config.ts
+node_modules
 pnpm-lock.yaml
 .releaserc
-node_modules
 .git
+.github
 .gitignore
