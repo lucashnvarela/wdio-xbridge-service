@@ -1,11 +1,11 @@
-src
+src/**
 tsconfig.json
 biome.json
-tests
+tests/**
 vitest.config.ts
-node_modules
+node_modules/**
 pnpm-lock.yaml
 .releaserc
-.git
-.github
+.git/**
+.github/**
 .gitignore
