@@ -1,8 +1,5 @@
-import logger from "@wdio/logger";
 import type { Services } from "@wdio/types";
 import { verifySupportedPlatform, XBridge } from "./xbridge";
-
-const log = logger("wdio-xbridge-service");
 
 export default class XBridgeService implements Services.ServiceInstance {
 	private platformName: string;
@@ -18,6 +15,5 @@ export default class XBridgeService implements Services.ServiceInstance {
 
 	async before(_capabilities: never, _specs: never, browser: WebdriverIO.Browser) {
 		browser.X = XBridge;
-		log.info(`Service registered for ${this.platformName} session`);
 	}
 }
