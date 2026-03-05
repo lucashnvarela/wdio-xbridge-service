@@ -1,5 +1,5 @@
-import { Exception, NavigationAxis, XPathConstructor, type Selector } from "../src/xbridge";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { Exception, NavigationAxis, type Selector, XPathConstructor } from "../src/xbridge";
 
 describe("simple selector", () => {
 	describe("iOS", () => {
