@@ -64,29 +64,38 @@ enum AndroidPredicates {
 }
 
 type IOSSelector =
-	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}="${string}"]`
-	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}='${string}']`
+	| `${keyof typeof IOSNode}`
 	| `${keyof typeof IOSPredicates}="${string}"`
-	| `${keyof typeof IOSPredicates}='${string}'`;
+	| `${keyof typeof IOSPredicates}='${string}'`
+	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}="${string}"]`
+	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}='${string}']`;
 
 type AndroidSelector =
-	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}="${string}"]`
-	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}='${string}']`
+	| `${keyof typeof AndroidNode}`
 	| `${keyof typeof AndroidPredicates}="${string}"`
-	| `${keyof typeof AndroidPredicates}='${string}'`;
+	| `${keyof typeof AndroidPredicates}='${string}'`
+	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}="${string}"]`
+	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}='${string}']`;
 
 export type Selector = IOSSelector | AndroidSelector | [IOSSelector, AndroidSelector] | [AndroidSelector, IOSSelector];
 
 interface XPathParams {
 	context?: string;
 	axis?: NavigationAxis;
-	selector: Selector;
+	selector?: Selector;
 }
+
+type ParseResult = [
+	keyof typeof IOSNode | keyof typeof AndroidNode,
+	keyof typeof IOSPredicates | keyof typeof AndroidPredicates,
+	string,
+];
 
 export enum Exception {
 	UnknownPlatform = "UnknownPlatformError",
 	SelectorRequired = "SelectorRequiredError",
 	InvalidSelector = "InvalidSelectorError",
+	InvalidNode = "InvalidNodeError",
 	InvalidAttribute = "InvalidAttributeError",
 	NotDisplayedAfterSwipe = "NotDisplayedAfterSwipeError",
 }
@@ -105,18 +114,19 @@ export function verifySupportedPlatform(platformName: string) {
 	if (!Object.values<string>(PlatformName).includes(platformName)) {
 		throw new XBridgeServiceError({
 			name: Exception.UnknownPlatform,
-			message: `Unsupported platform: "${platformName}". Expected one of [${Object.keys(PlatformName).join(", ")}].`,
+			message: `Unsupported platform: "${platformName}". Must be one of [${Object.keys(PlatformName).join(", ")}].`,
 		});
 	}
 }
 
 export class XPathConstructor {
-	private readonly INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/;
-	private readonly SELECTOR_PATTERN = /^(?<attr>\w+)=['"](?<value>.+)['"]$/;
-	private readonly NODE_SELECTOR_PATTERN = /^(?<node>\w+)?\[(?<attr>\w+)=['"](?<value>.+)['"]\]$/;
-	private readonly BOTH_SELECTOR_PATTERN = new RegExp(
-		`^${this.SELECTOR_PATTERN.source}|${this.NODE_SELECTOR_PATTERN.source}$`,
+	private readonly NODE_PATTERN = /^(?<node>\w+)$/;
+	private readonly ATTR_PATTERN = /^(?<attr>\w+)=['"](?<value>.+)['"]$/;
+	private readonly NODE_ATTR_PATTERN = /^(?<node>\w+)\[(?<attr>\w+)=['"](?<value>.+)['"]\]$/;
+	private readonly SELECTOR_PATTERN = new RegExp(
+		`^(?:${this.NODE_PATTERN.source}|${this.ATTR_PATTERN.source}|${this.NODE_ATTR_PATTERN.source})$`,
 	);
+	private readonly INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/;
 
 	private _context?: string;
 	private axis?: NavigationAxis;
@@ -129,10 +139,10 @@ export class XPathConstructor {
 		this.axis = axis;
 		this.selector = selector;
 
-		if (this.isRoot && !this.predicates.length && this.isAnyNodeType) {
+		if (this.isRoot && !this.hasNode && !this.predicates.length) {
 			throw new XBridgeServiceError({
 				name: Exception.SelectorRequired,
-				message: "A selector must be specified for the current platform.",
+				message: "No selector found for the current platform.",
 			});
 		}
 	}
@@ -149,94 +159,6 @@ export class XPathConstructor {
 		return this.node !== undefined;
 	}
 
-	private get isAnyNodeType(): boolean {
-		return !this.hasNode && (this.isRoot || this.hasNavigation);
-	}
-
-	get selector(): string {
-		let selector = "";
-
-		selector += this.isRoot ? "//" : this.hasNavigation ? `${this.context}${this.axis}` : this.context;
-
-		selector += this.hasNode ? this.node : this.isAnyNodeType ? "*" : "";
-
-		selector += this.predicates.join("");
-
-		return selector;
-	}
-
-	private set selector(selector: Selector) {
-		switch (typeof selector) {
-			case "string": {
-				const match = selector.match(this.BOTH_SELECTOR_PATTERN);
-				if (!match?.groups) {
-					throw new XBridgeServiceError({
-						name: Exception.InvalidSelector,
-						message: `Invalid selector: "${selector}". Expected a valid selector.`,
-					});
-				}
-				const nodeName = match.groups.node;
-				const attrName = match.groups.attr;
-				const val = match.groups.value;
-
-				switch (driver.capabilities.platformName) {
-					case PlatformName.iOS:
-						if (this.isIOSAttr(attrName)) {
-							if (nodeName !== undefined) {
-								this.assertIOSNode(nodeName);
-								this.node = `XCUIElementType${IOSNode[nodeName]}`;
-							}
-							this.predicates.push(IOSPredicates[attrName].replace("*value*", val));
-						}
-						break;
-					case PlatformName.Android:
-						if (this.isAndroidAttr(attrName)) {
-							if (nodeName !== undefined) {
-								this.assertAndroidNode(nodeName);
-								this.node = `android.${AndroidNode[nodeName]}`;
-							}
-							this.predicates.push(AndroidPredicates[attrName].replace("*value*", val));
-						}
-						break;
-				}
-				break;
-			}
-			case "object":
-				for (const s of selector) {
-					this.selector = s;
-				}
-				break;
-		}
-	}
-
-	private isIOSAttr(attrName: string): attrName is keyof typeof IOSPredicates {
-		return Object.keys(IOSPredicates).includes(attrName);
-	}
-
-	private isAndroidAttr(attrName: string): attrName is keyof typeof AndroidPredicates {
-		return Object.keys(AndroidPredicates).includes(attrName);
-	}
-
-	private assertIOSNode(nodeName: string): asserts nodeName is keyof typeof IOSNode {
-		if (Object.keys(IOSNode).includes(nodeName)) {
-			return;
-		}
-		throw new XBridgeServiceError({
-			name: Exception.InvalidAttribute,
-			message: `Invalid iOS node: "${nodeName}". Expected one of [${Object.keys(IOSNode).join(", ")}].`,
-		});
-	}
-
-	private assertAndroidNode(nodeName: string): asserts nodeName is keyof typeof AndroidNode {
-		if (Object.keys(AndroidNode).includes(nodeName)) {
-			return;
-		}
-		throw new XBridgeServiceError({
-			name: Exception.InvalidAttribute,
-			message: `Invalid Android node: "${nodeName}". Expected one of [${Object.keys(AndroidNode).join(", ")}].`,
-		});
-	}
-
 	private get context(): string | undefined {
 		return this._context;
 	}
@@ -251,6 +173,116 @@ export class XPathConstructor {
 			}
 		}
 	}
+
+	get selector(): string {
+		let selector = "";
+
+		selector += this.isRoot ? "//" : this.hasNavigation ? `${this.context}${this.axis}` : this.context;
+
+		selector += this.hasNode ? this.node : "*";
+
+		selector += this.predicates.join("");
+
+		return selector;
+	}
+
+	private set selector(selector: Selector | undefined) {
+		switch (typeof selector) {
+			case "string": {
+				const [node, attr, value] = this.parseMatch(selector.match(this.SELECTOR_PATTERN));
+				switch (driver.capabilities.platformName) {
+					case PlatformName.iOS:
+						if (node !== undefined && this.isIOSNode(node)) {
+							this.node = `XCUIElementType${IOSNode[node]}`;
+						}
+						if (attr !== undefined && this.isIOSAttr(attr)) {
+							this.predicates.push(IOSPredicates[attr].replace("*value*", value));
+						}
+						break;
+					case PlatformName.Android:
+						if (node !== undefined && this.isAndroidNode(node)) {
+							this.node = `android.${AndroidNode[node]}`;
+						}
+						if (attr !== undefined && this.isAndroidAttr(attr)) {
+							this.predicates.push(AndroidPredicates[attr].replace("*value*", value));
+						}
+						break;
+				}
+				break;
+			}
+			case "object":
+				if (selector.length > 2) {
+					throw new XBridgeServiceError({
+						name: Exception.InvalidSelector,
+						message: "Provide at most contain at ost 2 entries.",
+					});
+				}
+				for (const s of selector) {
+					this.selector = s;
+				}
+				break;
+		}
+	}
+
+	private parseMatch(match: RegExpMatchArray | null): ParseResult {
+		if (match?.groups === undefined) {
+			throw new XBridgeServiceError({
+				name: Exception.InvalidSelector,
+				message: `Selector format is invalid. Use '<node>', '<attr>="<value>"', or '<node>[<attr>="<value>"]'.`,
+			});
+		}
+		const [node, attr, value] = [match.groups.node, match.groups.attr, match.groups.value];
+		if (node !== undefined) {
+			if (!this.isIOSNode(node) && !this.isAndroidNode(node)) {
+				throw new XBridgeServiceError({
+					name: Exception.InvalidNode,
+					message: `Unknown node: "${node}".`,
+				});
+			}
+		}
+		if (attr !== undefined) {
+			if (!this.isIOSAttr(attr) && !this.isAndroidAttr(attr)) {
+				throw new XBridgeServiceError({
+					name: Exception.InvalidAttribute,
+					message: `Unknown attribute: "${attr}".`,
+				});
+			}
+			if (node !== undefined) {
+				if (
+					(!this.isIOSNode(node) && this.isIOSAttr(attr)) ||
+					(!this.isAndroidNode(node) && this.isAndroidAttr(attr))
+				) {
+					throw new XBridgeServiceError({
+						name: Exception.InvalidSelector,
+						message: `Node "${node}" and attribute "${attr}" don't belong to the same platform.`,
+					});
+				}
+			}
+			if (value === undefined) {
+				throw new XBridgeServiceError({
+					name: Exception.InvalidSelector,
+					message: `Missing value for attribute "${attr}".`,
+				});
+			}
+		}
+		return [node, attr, value];
+	}
+
+	private isIOSNode(node: string): node is keyof typeof IOSNode {
+		return Object.keys(IOSNode).includes(node);
+	}
+
+	private isIOSAttr(attr: string): attr is keyof typeof IOSPredicates {
+		return Object.keys(IOSPredicates).includes(attr);
+	}
+
+	private isAndroidNode(node: string): node is keyof typeof AndroidNode {
+		return Object.keys(AndroidNode).includes(node);
+	}
+
+	private isAndroidAttr(attr: string): attr is keyof typeof AndroidPredicates {
+		return Object.keys(AndroidPredicates).includes(attr);
+	}
 }
 
 class Locator {
@@ -260,7 +292,6 @@ class Locator {
 	public locator: string;
 
 	constructor(locator: string) {
-		log.debug(`[Locator.constructor] Selector: ${locator}`);
 		this.locator = locator;
 	}
 
@@ -285,9 +316,8 @@ class Locator {
 
 		const windowSize = await driver.getWindowSize();
 
-		log.info("Element not in viewport, attempting to swipe into view");
+		log.debug("ACTION swipe");
 		for (let attempts = 1; attempts <= MAX_SWIPE_ATTEMPTS; attempts++) {
-			log.debug(`[Locator.swipe] Attempt ${attempts}/${MAX_SWIPE_ATTEMPTS}`);
 			await driver.swipe({
 				direction: SWIPE_DIRECTION,
 				duration: SWIPE_DURATION,
@@ -301,130 +331,133 @@ class Locator {
 				},
 			});
 			if (await $(this.locator).isDisplayed()) {
-				log.info("Element brought into view");
 				return;
 			}
 		}
 
 		throw new XBridgeServiceError({
 			name: Exception.NotDisplayedAfterSwipe,
-			message: `Element not found after ${MAX_SWIPE_ATTEMPTS} swipe attempts.`,
+			message: `Element was not displayed after ${MAX_SWIPE_ATTEMPTS} swipe attempts.`,
 		});
 	}
 
 	get ios(): Locator {
 		this.platformScope = PlatformName.iOS;
+		log.debug("PLATFORM iOS");
 		return this;
 	}
 
 	get android(): Locator {
 		this.platformScope = PlatformName.Android;
+		log.debug("PLATFORM Android");
 		return this;
 	}
 
 	get swipe(): Locator {
 		this.swipeEnabled = true;
+		log.debug("SWIPE enabled");
 		return this;
 	}
 
 	async click(): Promise<void> {
 		await this.swipeMotion();
-		log.debug("[Locator.click]");
+		log.debug("ACTION click");
 		await $(`(${this.locator})[1]`).click();
 	}
 
 	async fill(val: string): Promise<void> {
 		await this.swipeMotion();
-		log.debug(`[Locator.fill] Value: "${val}"`);
+		log.debug(`ACTION fill("${val}")`);
 		await $(`(${this.locator})[1]`).setValue(val);
 	}
 
-	ancestor(selector: Selector): Locator {
+	ancestor(selector?: Selector): Locator {
 		if (!this.scopeCheck()) {
 			return this;
 		}
+		log.debug("NAVIGATION ancestor");
 		const xpath = new XPathConstructor({
 			context: this.locator,
 			axis: NavigationAxis.Ancestor,
 			selector,
 		});
 		this.locator = xpath.selector;
-		log.debug(`[Locator.ancestor] Selector: "${this.locator}"`);
 		return this;
 	}
 
-	descendant(selector: Selector): Locator {
+	descendant(selector?: Selector): Locator {
 		if (!this.scopeCheck()) {
 			return this;
 		}
+		log.debug("NAVIGATION descendant");
 		const xpath = new XPathConstructor({
 			context: this.locator,
 			axis: NavigationAxis.Descendant,
 			selector,
 		});
 		this.locator = xpath.selector;
-		log.debug(`[Locator.descendant] Selector: "${this.locator}"`);
 		return this;
 	}
 
-	parent(selector: Selector): Locator {
+	parent(selector?: Selector): Locator {
 		if (!this.scopeCheck()) {
 			return this;
 		}
+		log.debug("NAVIGATION parent");
 		const xpath = new XPathConstructor({
 			context: this.locator,
 			axis: NavigationAxis.Parent,
 			selector,
 		});
 		this.locator = xpath.selector;
-		log.debug(`[Locator.parent] Selector: "${this.locator}"`);
 		return this;
 	}
 
-	child(selector: Selector): Locator {
+	child(selector?: Selector): Locator {
 		if (!this.scopeCheck()) {
 			return this;
 		}
+		log.debug("NAVIGATION child");
 		const xpath = new XPathConstructor({
 			context: this.locator,
 			axis: NavigationAxis.Child,
 			selector,
 		});
 		this.locator = xpath.selector;
-		log.debug(`[Locator.child] Selector: "${this.locator}"`);
 		return this;
 	}
 
-	previous(selector: Selector): Locator {
+	previous(selector?: Selector): Locator {
 		if (!this.scopeCheck()) {
 			return this;
 		}
+		log.debug("NAVIGATION previous");
 		const xpath = new XPathConstructor({
 			context: this.locator,
 			axis: NavigationAxis.Preceding,
 			selector,
 		});
 		this.locator = xpath.selector;
-		log.debug(`[Locator.previous] Selector: "${this.locator}"`);
 		return this;
 	}
 
-	next(selector: Selector): Locator {
+	next(selector?: Selector): Locator {
 		if (!this.scopeCheck()) {
 			return this;
 		}
+		log.debug("NAVIGATION next");
 		const xpath = new XPathConstructor({
 			context: this.locator,
 			axis: NavigationAxis.Following,
 			selector,
 		});
 		this.locator = xpath.selector;
-		log.debug(`[Locator.next] Selector: "${this.locator}"`);
 		return this;
 	}
 }
 
 export function XBridge(selector: Selector): Locator {
+	log.debug(`NEW "${selector}"`);
 	const xpath = new XPathConstructor({ selector });
 	return new Locator(xpath.selector);
 }

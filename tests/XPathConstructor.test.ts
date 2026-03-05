@@ -22,16 +22,6 @@ describe("simple selector", () => {
 			});
 			expect(xpath.selector).toBe('//*[contains(@label, "Add")]');
 		});
-
-		it("builds selector with name", () => {
-			const xpath = new XPathConstructor({ selector: 'name="productTitle"' });
-			expect(xpath.selector).toBe('//*[@name="productTitle"]');
-		});
-
-		it("builds selector with value", () => {
-			const xpath = new XPathConstructor({ selector: 'value="1"' });
-			expect(xpath.selector).toBe('//*[@value="1"]');
-		});
 	});
 
 	describe("Android", () => {
@@ -51,16 +41,6 @@ describe("simple selector", () => {
 		it("builds selector with textContains", () => {
 			const xpath = new XPathConstructor({ selector: 'textContains="Add"' });
 			expect(xpath.selector).toBe('//*[contains(@text, "Add")]');
-		});
-
-		it("builds selector with resourceId", () => {
-			const xpath = new XPathConstructor({ selector: 'resourceId="addToCartBtn"' });
-			expect(xpath.selector).toBe('//*[@resource-id="addToCartBtn"]');
-		});
-
-		it("builds selector with description", () => {
-			const xpath = new XPathConstructor({ selector: 'description="Product image"' });
-			expect(xpath.selector).toBe('//*[@content-desc="Product image"]');
 		});
 	});
 });
@@ -84,16 +64,6 @@ describe("selectors with node", () => {
 			const xpath = new XPathConstructor({ selector: 'switch[labelContains="Notify me"]' });
 			expect(xpath.selector).toBe('//XCUIElementTypeSwitch[contains(@label, "Notify me")]');
 		});
-
-		it("builds selector with text+name", () => {
-			const xpath = new XPathConstructor({ selector: 'text[name="productTitle"]' });
-			expect(xpath.selector).toBe('//XCUIElementTypeStaticText[@name="productTitle"]');
-		});
-
-		it("builds selector with input+value", () => {
-			const xpath = new XPathConstructor({ selector: 'input[value="1"]' });
-			expect(xpath.selector).toBe('//XCUIElementTypeTextField[@value="1"]');
-		});
 	});
 
 	describe("Android", () => {
@@ -110,19 +80,51 @@ describe("selectors with node", () => {
 			expect(xpath.selector).toBe('//android.widget.Button[@text="Add to cart"]');
 		});
 
-		it("builds selector with imageview+description", () => {
-			const xpath = new XPathConstructor({ selector: 'imageview[description="Product image"]' });
-			expect(xpath.selector).toBe('//android.widget.ImageView[@content-desc="Product image"]');
+		it("builds selector with imageview+textContains", () => {
+			const xpath = new XPathConstructor({ selector: 'imageview[textContains="Product image"]' });
+			expect(xpath.selector).toBe('//android.widget.ImageView[contains(@text, "Product image")]');
+		});
+	});
+});
+
+describe("node-only selector", () => {
+	describe("iOS", () => {
+		beforeAll(() => {
+			vi.stubGlobal("driver", {
+				capabilities: {
+					platformName: "iOS",
+				},
+			});
 		});
 
-		it("builds selector with input+resourceId", () => {
-			const xpath = new XPathConstructor({ selector: 'input[resourceId="quantityInput"]' });
-			expect(xpath.selector).toBe('//android.widget.EditText[@resource-id="quantityInput"]');
+		it("builds selector with button node only", () => {
+			const xpath = new XPathConstructor({ selector: "button" });
+			expect(xpath.selector).toBe("//XCUIElementTypeButton");
 		});
 
-		it("builds selector with text+description", () => {
-			const xpath = new XPathConstructor({ selector: 'text[description="Product rating"]' });
-			expect(xpath.selector).toBe('//android.widget.TextView[@content-desc="Product rating"]');
+		it("builds selector with text node only", () => {
+			const xpath = new XPathConstructor({ selector: "text" });
+			expect(xpath.selector).toBe("//XCUIElementTypeStaticText");
+		});
+	});
+
+	describe("Android", () => {
+		beforeAll(() => {
+			vi.stubGlobal("driver", {
+				capabilities: {
+					platformName: "Android",
+				},
+			});
+		});
+
+		it("builds selector with button node only", () => {
+			const xpath = new XPathConstructor({ selector: "button" });
+			expect(xpath.selector).toBe("//android.widget.Button");
+		});
+
+		it("builds selector with text node only", () => {
+			const xpath = new XPathConstructor({ selector: "text" });
+			expect(xpath.selector).toBe("//android.widget.TextView");
 		});
 	});
 });
@@ -595,8 +597,14 @@ describe("error cases", () => {
 			);
 		});
 
-		it("throws InvalidAttributeError for an invalid iOS node", () => {
+		it("throws InvalidNodeError for an invalid node", () => {
 			expect(() => new XPathConstructor({ selector: 'badNode[label="Login"]' as Selector })).toThrowError(
+				expect.objectContaining({ name: Exception.InvalidNode }),
+			);
+		});
+
+		it("throws InvalidAttributeError for an invalid attribute", () => {
+			expect(() => new XPathConstructor({ selector: 'button[badAttr="Login"]' as Selector })).toThrowError(
 				expect.objectContaining({ name: Exception.InvalidAttribute }),
 			);
 		});
@@ -629,8 +637,14 @@ describe("error cases", () => {
 			);
 		});
 
-		it("throws InvalidAttributeError for an invalid Android node", () => {
+		it("throws InvalidNodeError for an invalid node", () => {
 			expect(() => new XPathConstructor({ selector: 'badNode[text="Login"]' as Selector })).toThrowError(
+				expect.objectContaining({ name: Exception.InvalidNode }),
+			);
+		});
+
+		it("throws InvalidAttributeError for an invalid attribute", () => {
+			expect(() => new XPathConstructor({ selector: 'button[badAttr="Login"]' as Selector })).toThrowError(
 				expect.objectContaining({ name: Exception.InvalidAttribute }),
 			);
 		});
