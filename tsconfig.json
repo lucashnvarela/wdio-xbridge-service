@@ -11,6 +11,6 @@
 		"skipLibCheck": true,
 		"types": ["node", "@wdio/globals/types"]
 	},
-	"include": ["./src/**/*", "tests/XPathConstructor.test.ts"],
+	"include": ["./src/**/*"],
 	"exclude": ["./node_modules/**", "./build/**/*"]
 }
