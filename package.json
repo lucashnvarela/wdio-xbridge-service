@@ -1,7 +1,7 @@
 {
 	"name": "wdio-xbridge-service",
 	"version": "2.1.0",
-	"description": "",
+	"description": "A WebdriverIO service with a cross-platform selector API.",
 	"author": "lucas.varela",
 	"homepage": "https://github.com/lucashnvarela/wdio-xbridge-service#readme",
 	"license": "MIT",
