@@ -46,7 +46,7 @@ To enable type support, add `wdio-xbridge-service` to your `tsconfig.json`:
 
 ## Usage
 
-For the full selector and API reference, see the [documentation](docs/usage.md).
+For the complete list of supported selectors and navigation methods, see the [API reference](docs/usage.md).
 
 ### Selectors
 
@@ -58,7 +58,7 @@ const input = driver.X('input[label="Username"]')
 const hint = driver.X('label="Username"')
 ```
 
-**Cross-platform selectors** — both platforms can be targeted at once by passing a tuple. Each selector targets one platform, and the correct one is picked automatically at runtime:
+**Cross-platform selectors** — pass a tuple of two selectors to target both platforms, and the correct selector is resolved at runtime:
 
 ```typescript
 const username = driver.X([
@@ -69,7 +69,7 @@ const username = driver.X([
 
 ### Navigation
 
-Navigate the element tree using `.ancestor`, `.descendant`, `.parent`, `.child`, `.previous`, and `.next`. All methods accept an optional selector and are chainable:
+Navigate the element tree relative to the previous selector using `.ancestor`, `.descendant`, `.parent`, `.child`, `.previous`, and `.next`. All methods accept an optional selector and are chainable:
 
 ```typescript
 driver.X('label="Profile"')
