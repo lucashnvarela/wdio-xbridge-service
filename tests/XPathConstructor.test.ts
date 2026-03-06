@@ -567,6 +567,262 @@ describe("navigation axis", () => {
 			});
 		});
 	});
+
+	describe("node-only selector", () => {
+		describe("iOS", () => {
+			const context = '//XCUIElementTypeButton[@label="Add to cart"]';
+
+			beforeAll(() => {
+				vi.stubGlobal("driver", {
+					capabilities: {
+						platformName: "iOS",
+					},
+				});
+			});
+
+			it("builds descendant selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Descendant,
+					selector: "button",
+				});
+				expect(xpath.selector).toBe(`${context}/descendant::XCUIElementTypeButton`);
+			});
+
+			it("builds ancestor selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Ancestor,
+					selector: "cell",
+				});
+				expect(xpath.selector).toBe(`${context}/ancestor::XCUIElementTypeCell`);
+			});
+
+			it("builds parent selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Parent,
+					selector: "cell",
+				});
+				expect(xpath.selector).toBe(`${context}/parent::XCUIElementTypeCell`);
+			});
+
+			it("builds child selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Child,
+					selector: "text",
+				});
+				expect(xpath.selector).toBe(`${context}/child::XCUIElementTypeStaticText`);
+			});
+
+			it("builds preceding-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Preceding,
+					selector: "button",
+				});
+				expect(xpath.selector).toBe(`${context}/preceding-sibling::XCUIElementTypeButton`);
+			});
+
+			it("builds following-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Following,
+					selector: "button",
+				});
+				expect(xpath.selector).toBe(`${context}/following-sibling::XCUIElementTypeButton`);
+			});
+		});
+
+		describe("Android", () => {
+			const context = '//android.widget.Button[@text="Add to cart"]';
+
+			beforeAll(() => {
+				vi.stubGlobal("driver", {
+					capabilities: {
+						platformName: "Android",
+					},
+				});
+			});
+
+			it("builds descendant selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Descendant,
+					selector: "button",
+				});
+				expect(xpath.selector).toBe(`${context}/descendant::android.widget.Button`);
+			});
+
+			it("builds ancestor selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Ancestor,
+					selector: "frame",
+				});
+				expect(xpath.selector).toBe(`${context}/ancestor::android.widget.FrameLayout`);
+			});
+
+			it("builds parent selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Parent,
+					selector: "frame",
+				});
+				expect(xpath.selector).toBe(`${context}/parent::android.widget.FrameLayout`);
+			});
+
+			it("builds child selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Child,
+					selector: "text",
+				});
+				expect(xpath.selector).toBe(`${context}/child::android.widget.TextView`);
+			});
+
+			it("builds preceding-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Preceding,
+					selector: "button",
+				});
+				expect(xpath.selector).toBe(`${context}/preceding-sibling::android.widget.Button`);
+			});
+
+			it("builds following-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Following,
+					selector: "button",
+				});
+				expect(xpath.selector).toBe(`${context}/following-sibling::android.widget.Button`);
+			});
+		});
+	});
+
+	describe("no selector", () => {
+		describe("iOS", () => {
+			const context = '//XCUIElementTypeButton[@label="Add to cart"]';
+
+			beforeAll(() => {
+				vi.stubGlobal("driver", {
+					capabilities: {
+						platformName: "iOS",
+					},
+				});
+			});
+
+			it("builds descendant selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Descendant,
+				});
+				expect(xpath.selector).toBe(`${context}/descendant::*`);
+			});
+
+			it("builds ancestor selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Ancestor,
+				});
+				expect(xpath.selector).toBe(`${context}/ancestor::*`);
+			});
+
+			it("builds parent selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Parent,
+				});
+				expect(xpath.selector).toBe(`${context}/parent::*`);
+			});
+
+			it("builds child selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Child,
+				});
+				expect(xpath.selector).toBe(`${context}/child::*`);
+			});
+
+			it("builds preceding-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Preceding,
+				});
+				expect(xpath.selector).toBe(`${context}/preceding-sibling::*`);
+			});
+
+			it("builds following-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Following,
+				});
+				expect(xpath.selector).toBe(`${context}/following-sibling::*`);
+			});
+		});
+
+		describe("Android", () => {
+			const context = '//android.widget.Button[@text="Add to cart"]';
+
+			beforeAll(() => {
+				vi.stubGlobal("driver", {
+					capabilities: {
+						platformName: "Android",
+					},
+				});
+			});
+
+			it("builds descendant selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Descendant,
+				});
+				expect(xpath.selector).toBe(`${context}/descendant::*`);
+			});
+
+			it("builds ancestor selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Ancestor,
+				});
+				expect(xpath.selector).toBe(`${context}/ancestor::*`);
+			});
+
+			it("builds parent selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Parent,
+				});
+				expect(xpath.selector).toBe(`${context}/parent::*`);
+			});
+
+			it("builds child selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Child,
+				});
+				expect(xpath.selector).toBe(`${context}/child::*`);
+			});
+
+			it("builds preceding-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Preceding,
+				});
+				expect(xpath.selector).toBe(`${context}/preceding-sibling::*`);
+			});
+
+			it("builds following-sibling selector", () => {
+				const xpath = new XPathConstructor({
+					context,
+					axis: NavigationAxis.Following,
+				});
+				expect(xpath.selector).toBe(`${context}/following-sibling::*`);
+			});
+		});
+	});
 });
 
 describe("error cases", () => {
