@@ -1,8 +1,10 @@
 # wdio-xbridge-service
 
-[![npm](https://img.shields.io/npm/v/wdio-xbridge-service.svg)](https://www.npmjs.com/package/wdio-xbridge-service) [![CI](https://img.shields.io/github/actions/workflow/status/lucashnvarela/wdio-xbridge-service/test.yaml)](https://github.com/lucashnvarela/wdio-xbridge-service/actions/workflows/test.yaml)
+[![npm](https://img.shields.io/npm/v/wdio-xbridge-service.svg)](https://www.npmjs.com/package/wdio-xbridge-service) [![CI](https://img.shields.io/github/actions/workflow/status/lucashnvarela/wdio-xbridge-service/test.yaml)](https://github.com/lucashnvarela/wdio-xbridge-service/actions/workflows/test.yaml) [![semantic-release](https://img.shields.io/badge/semantic--release-angular-e10079)](.releaserc)
 
-A WebdriverIO service with a cross-platform selector API on top of XPath to locate and interact with native iOS and Android UI elements.
+#### A WebdriverIO service with a cross-platform selector API for iOS and Android automation.
+
+**wdio-xbridge-service** maps selector node types and attributes to the correct XPath expression for each platform at runtime, removing the need for platform-specific branching.
 
 ## Installation
 
@@ -44,9 +46,11 @@ To enable type support, add `wdio-xbridge-service` to your `tsconfig.json`:
 
 ## Usage
 
+For the full selector and API reference, see the [documentation](docs/usage.md).
+
 ### Selectors
 
-`XBridge` accepts selectors in three formats: `<node>`, `<node>[<attribute>="<value>"]`, or `<attribute>="<value>"`. The selector is resolved at runtime — node types and attributes are automatically mapped to the appropriate XPath for the current platform.
+Selectors can target a node, an attribute, or both: `<node>`, `<attribute>="<value>"`, `<node>[<attribute>="<value>"]`
 
 ```typescript
 const submit = driver.X('button')
@@ -54,26 +58,13 @@ const input = driver.X('input[label="Username"]')
 const hint = driver.X('label="Username"')
 ```
 
-**Cross-platform selectors** — pass a tuple to write a single test that runs on both platforms. Each selector targets one platform, and the correct one is picked automatically at runtime:
+**Cross-platform selectors** — both platforms can be targeted at once by passing a tuple. Each selector targets one platform, and the correct one is picked automatically at runtime:
 
 ```typescript
 const username = driver.X([
   'input[label="Username"]',  // iOS
   'input[text="Username"]',   // Android
 ])
-```
-
-### Actions
-
-```typescript
-await driver.X('button[name="Edit"]').click()
-await driver.X('label="Username"').fill('wdio@example.com')
-```
-
-**Swipe into view** — chain `.swipe` to automatically scroll the element into the view before interacting:
-
-```typescript
-await driver.X('button').swipe.click()
 ```
 
 ### Navigation
@@ -93,4 +84,17 @@ driver.X('label="Profile"')
 driver.X(['text[name="Settings"]', 'text[description="Settings"]'])
   .ios.parent('window[name="settings-row"]')
   .android.ancestor('frame[resourceId="settings-section"]')
+```
+
+### Actions
+
+```typescript
+await driver.X('button[name="Edit"]').click()
+await driver.X('label="Username"').fill('wdio@example.com')
+```
+
+**Swipe into view** — chain `.swipe` to automatically scroll the element into the view before interacting:
+
+```typescript
+await driver.X('button').swipe.click()
 ```
