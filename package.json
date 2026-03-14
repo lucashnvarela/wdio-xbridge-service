@@ -17,8 +17,9 @@
 	"scripts": {
 		"build": "tsc --build",
 		"clean": "rm -rf ./build",
-		"test": "vitest --run",
-		"lint": "biome check ."
+		"test": "vitest run",
+		"coverage": "vitest run --coverage",
+		"lint": "biome check"
 	},
 	"type": "module",
 	"main": "./build/index.js",
