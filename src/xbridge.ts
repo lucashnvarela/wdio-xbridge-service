@@ -126,12 +126,10 @@ class XPathConstructor {
 	private readonly SELECTOR_PATTERN = new RegExp(
 		`^(?:${this.NODE_PATTERN.source}|${this.ATTR_PATTERN.source}|${this.NODE_ATTR_PATTERN.source})$`,
 	);
-	private readonly INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/;
 
-	private _context?: string;
+	private context?: string;
 	private axis?: NavigationAxis;
 	private node?: XCUIElementType | AndroidElementClass;
-
 	private predicates: string[] = [];
 
 	constructor({ context, axis, selector }: XPathParams) {
@@ -157,21 +155,6 @@ class XPathConstructor {
 
 	private get hasNode(): boolean {
 		return this.node !== undefined;
-	}
-
-	private get context(): string | undefined {
-		return this._context;
-	}
-
-	private set context(ctx: string | undefined) {
-		if (ctx !== undefined) {
-			this._context = ctx;
-
-			const match = ctx.match(this.INDEX_PATTERN);
-			if (match?.groups) {
-				this._context = match.groups.selector;
-			}
-		}
 	}
 
 	get selector(): string {
