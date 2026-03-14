@@ -4,9 +4,9 @@ biome.json
 tests/**
 vitest.config.ts
 node_modules/**
+.nvmrc
 pnpm-lock.yaml
 .releaserc
 .git/**
 .github/**
 .gitignore
-docs/**
