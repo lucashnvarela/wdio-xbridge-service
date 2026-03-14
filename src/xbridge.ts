@@ -270,8 +270,6 @@ class XPathConstructor {
 
 class Locator {
 	private platformScope?: PlatformName;
-	private swipeEnabled: boolean = false;
-
 	public locator: string;
 
 	constructor(selector: Selector) {
@@ -285,46 +283,6 @@ class Locator {
 		return scopeCheck;
 	}
 
-	private async swipeMotion() {
-		if (!this.swipeEnabled) {
-			return;
-		}
-
-		const MAX_SWIPE_ATTEMPTS = 5;
-		const SWIPE_DIRECTION = "up";
-		const SWIPE_DURATION = 500;
-
-		if (await $(this.locator).isDisplayed()) {
-			return;
-		}
-
-		const windowSize = await driver.getWindowSize();
-
-		log.debug("ACTION swipe");
-		for (let attempts = 1; attempts <= MAX_SWIPE_ATTEMPTS; attempts++) {
-			await driver.swipe({
-				direction: SWIPE_DIRECTION,
-				duration: SWIPE_DURATION,
-				from: {
-					x: windowSize.width * 0.5,
-					y: windowSize.height * 0.4,
-				},
-				to: {
-					x: windowSize.width * 0.5,
-					y: windowSize.height * 0.1,
-				},
-			});
-			if (await $(this.locator).isDisplayed()) {
-				return;
-			}
-		}
-
-		throw new XBridgeServiceError({
-			name: Exception.NotDisplayedAfterSwipe,
-			message: `Element was not displayed after ${MAX_SWIPE_ATTEMPTS} swipe attempts.`,
-		});
-	}
-
 	get ios(): Locator {
 		this.platformScope = PlatformName.iOS;
 		log.debug("PLATFORM iOS");
@@ -335,24 +293,6 @@ class Locator {
 		this.platformScope = PlatformName.Android;
 		log.debug("PLATFORM Android");
 		return this;
-	}
-
-	get swipe(): Locator {
-		this.swipeEnabled = true;
-		log.debug("SWIPE enabled");
-		return this;
-	}
-
-	async click(): Promise<void> {
-		await this.swipeMotion();
-		log.debug("ACTION click");
-		await $(`(${this.locator})[1]`).click();
-	}
-
-	async fill(val: string): Promise<void> {
-		await this.swipeMotion();
-		log.debug(`ACTION fill("${val}")`);
-		await $(`(${this.locator})[1]`).setValue(val);
 	}
 
 	ancestor(selector?: Selector): Locator {
