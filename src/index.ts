@@ -1,13 +1,13 @@
 import XBridgeService from "./service";
-import { XBridge } from "./xbridge";
+import { Locator, type Selector } from "./xbridge";
 
 export default XBridgeService;
-export { XBridge };
+export { Locator };
 
 declare global {
 	namespace WebdriverIO {
 		interface Browser {
-			X: typeof XBridge;
+			X: (selector: Selector) => Locator;
 		}
 	}
 }

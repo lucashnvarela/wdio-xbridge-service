@@ -36,7 +36,7 @@ enum AndroidNode {
 	view = "view.View",
 }
 
-export enum NavigationAxis {
+enum NavigationAxis {
 	Ancestor = "/ancestor::",
 	Descendant = "/descendant::",
 	Parent = "/parent::",
@@ -77,7 +77,7 @@ type AndroidSelector =
 	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}="${string}"]`
 	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}='${string}']`;
 
-export type Selector = IOSSelector | AndroidSelector | [IOSSelector, AndroidSelector] | [AndroidSelector, IOSSelector];
+type Selector = IOSSelector | AndroidSelector | [IOSSelector, AndroidSelector] | [AndroidSelector, IOSSelector];
 
 interface XPathParams {
 	context?: string;
@@ -91,7 +91,7 @@ type ParseResult = [
 	string,
 ];
 
-export enum Exception {
+enum Exception {
 	UnknownPlatform = "UnknownPlatformError",
 	SelectorRequired = "SelectorRequiredError",
 	InvalidSelector = "InvalidSelectorError",
@@ -110,7 +110,7 @@ class XBridgeServiceError extends Error {
 	}
 }
 
-export function verifySupportedPlatform(platformName: string) {
+function verifySupportedPlatform(platformName: string) {
 	if (!Object.values<string>(PlatformName).includes(platformName)) {
 		throw new XBridgeServiceError({
 			name: Exception.UnknownPlatform,
@@ -119,7 +119,7 @@ export function verifySupportedPlatform(platformName: string) {
 	}
 }
 
-export class XPathConstructor {
+class XPathConstructor {
 	private readonly NODE_PATTERN = /^(?<node>\w+)$/;
 	private readonly ATTR_PATTERN = /^(?<attr>\w+)=['"](?<value>.+)['"]$/;
 	private readonly NODE_ATTR_PATTERN = /^(?<node>\w+)\[(?<attr>\w+)=['"](?<value>.+)['"]\]$/;
@@ -291,8 +291,9 @@ class Locator {
 
 	public locator: string;
 
-	constructor(locator: string) {
-		this.locator = locator;
+	constructor(selector: Selector) {
+		const xpath = new XPathConstructor({ selector });
+		this.locator = xpath.selector;
 	}
 
 	private scopeCheck(): boolean {
@@ -456,8 +457,4 @@ class Locator {
 	}
 }
 
-export function XBridge(selector: Selector): Locator {
-	log.debug(`NEW "${selector}"`);
-	const xpath = new XPathConstructor({ selector });
-	return new Locator(xpath.selector);
-}
+export { NavigationAxis, type Selector, Exception, verifySupportedPlatform, XPathConstructor, Locator };
