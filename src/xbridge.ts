@@ -36,7 +36,7 @@ enum AndroidNode {
 	view = "view.View",
 }
 
-export enum NavigationAxis {
+enum NavigationAxis {
 	Ancestor = "/ancestor::",
 	Descendant = "/descendant::",
 	Parent = "/parent::",
@@ -65,19 +65,19 @@ enum AndroidPredicates {
 
 type IOSSelector =
 	| `${keyof typeof IOSNode}`
-	| `${keyof typeof IOSPredicates}="${string}"`
-	| `${keyof typeof IOSPredicates}='${string}'`
+	| `[${keyof typeof IOSPredicates}="${string}"]`
+	| `[${keyof typeof IOSPredicates}='${string}']`
 	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}="${string}"]`
 	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}='${string}']`;
 
 type AndroidSelector =
 	| `${keyof typeof AndroidNode}`
-	| `${keyof typeof AndroidPredicates}="${string}"`
-	| `${keyof typeof AndroidPredicates}='${string}'`
+	| `[${keyof typeof AndroidPredicates}="${string}"]`
+	| `[${keyof typeof AndroidPredicates}='${string}']`
 	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}="${string}"]`
 	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}='${string}']`;
 
-export type Selector = IOSSelector | AndroidSelector | [IOSSelector, AndroidSelector] | [AndroidSelector, IOSSelector];
+type Selector = IOSSelector | AndroidSelector | [IOSSelector, AndroidSelector] | [AndroidSelector, IOSSelector];
 
 interface XPathParams {
 	context?: string;
@@ -91,7 +91,7 @@ type ParseResult = [
 	string,
 ];
 
-export enum Exception {
+enum Exception {
 	UnknownPlatform = "UnknownPlatformError",
 	SelectorRequired = "SelectorRequiredError",
 	InvalidSelector = "InvalidSelectorError",
@@ -110,7 +110,7 @@ class XBridgeServiceError extends Error {
 	}
 }
 
-export function verifySupportedPlatform(platformName: string) {
+function verifySupportedPlatform(platformName: string): asserts platformName is PlatformName {
 	if (!Object.values<string>(PlatformName).includes(platformName)) {
 		throw new XBridgeServiceError({
 			name: Exception.UnknownPlatform,
@@ -119,19 +119,12 @@ export function verifySupportedPlatform(platformName: string) {
 	}
 }
 
-export class XPathConstructor {
-	private readonly NODE_PATTERN = /^(?<node>\w+)$/;
-	private readonly ATTR_PATTERN = /^(?<attr>\w+)=['"](?<value>.+)['"]$/;
-	private readonly NODE_ATTR_PATTERN = /^(?<node>\w+)\[(?<attr>\w+)=['"](?<value>.+)['"]\]$/;
-	private readonly SELECTOR_PATTERN = new RegExp(
-		`^(?:${this.NODE_PATTERN.source}|${this.ATTR_PATTERN.source}|${this.NODE_ATTR_PATTERN.source})$`,
-	);
-	private readonly INDEX_PATTERN = /^\((?<selector>.+)\)\[\d+\]$/;
+class XPathConstructor {
+	private readonly SELECTOR_PATTERN = /^(?<node>\w+)?(?:\[(?<attr>\w+)=['"](?<value>.+)['"]\])?$/;
 
-	private _context?: string;
+	private context?: string;
 	private axis?: NavigationAxis;
 	private node?: XCUIElementType | AndroidElementClass;
-
 	private predicates: string[] = [];
 
 	constructor({ context, axis, selector }: XPathParams) {
@@ -157,21 +150,6 @@ export class XPathConstructor {
 
 	private get hasNode(): boolean {
 		return this.node !== undefined;
-	}
-
-	private get context(): string | undefined {
-		return this._context;
-	}
-
-	private set context(ctx: string | undefined) {
-		if (ctx !== undefined) {
-			this._context = ctx;
-
-			const match = ctx.match(this.INDEX_PATTERN);
-			if (match?.groups) {
-				this._context = match.groups.selector;
-			}
-		}
 	}
 
 	get selector(): string {
@@ -287,58 +265,17 @@ export class XPathConstructor {
 
 class Locator {
 	private platformScope?: PlatformName;
-	private swipeEnabled: boolean = false;
-
 	public locator: string;
 
-	constructor(locator: string) {
-		this.locator = locator;
+	constructor(selector: Selector) {
+		const xpath = new XPathConstructor({ selector });
+		this.locator = xpath.selector;
 	}
 
 	private scopeCheck(): boolean {
 		const scopeCheck = this.platformScope !== undefined && this.platformScope === driver.capabilities.platformName;
 		this.platformScope &&= undefined;
 		return scopeCheck;
-	}
-
-	private async swipeMotion() {
-		if (!this.swipeEnabled) {
-			return;
-		}
-
-		const MAX_SWIPE_ATTEMPTS = 5;
-		const SWIPE_DIRECTION = "up";
-		const SWIPE_DURATION = 500;
-
-		if (await $(this.locator).isDisplayed()) {
-			return;
-		}
-
-		const windowSize = await driver.getWindowSize();
-
-		log.debug("ACTION swipe");
-		for (let attempts = 1; attempts <= MAX_SWIPE_ATTEMPTS; attempts++) {
-			await driver.swipe({
-				direction: SWIPE_DIRECTION,
-				duration: SWIPE_DURATION,
-				from: {
-					x: windowSize.width * 0.5,
-					y: windowSize.height * 0.4,
-				},
-				to: {
-					x: windowSize.width * 0.5,
-					y: windowSize.height * 0.1,
-				},
-			});
-			if (await $(this.locator).isDisplayed()) {
-				return;
-			}
-		}
-
-		throw new XBridgeServiceError({
-			name: Exception.NotDisplayedAfterSwipe,
-			message: `Element was not displayed after ${MAX_SWIPE_ATTEMPTS} swipe attempts.`,
-		});
 	}
 
 	get ios(): Locator {
@@ -351,24 +288,6 @@ class Locator {
 		this.platformScope = PlatformName.Android;
 		log.debug("PLATFORM Android");
 		return this;
-	}
-
-	get swipe(): Locator {
-		this.swipeEnabled = true;
-		log.debug("SWIPE enabled");
-		return this;
-	}
-
-	async click(): Promise<void> {
-		await this.swipeMotion();
-		log.debug("ACTION click");
-		await $(`(${this.locator})[1]`).click();
-	}
-
-	async fill(val: string): Promise<void> {
-		await this.swipeMotion();
-		log.debug(`ACTION fill("${val}")`);
-		await $(`(${this.locator})[1]`).setValue(val);
 	}
 
 	ancestor(selector?: Selector): Locator {
@@ -456,8 +375,4 @@ class Locator {
 	}
 }
 
-export function XBridge(selector: Selector): Locator {
-	log.debug(`NEW "${selector}"`);
-	const xpath = new XPathConstructor({ selector });
-	return new Locator(xpath.selector);
-}
+export { NavigationAxis, type Selector, Exception, verifySupportedPlatform, XPathConstructor, Locator };

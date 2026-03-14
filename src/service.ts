@@ -1,5 +1,5 @@
 import type { Services } from "@wdio/types";
-import { verifySupportedPlatform, XBridge } from "./xbridge";
+import { Locator, type Selector, verifySupportedPlatform } from "./xbridge";
 
 export default class XBridgeService implements Services.ServiceInstance {
 	private platformName: string;
@@ -13,7 +13,7 @@ export default class XBridgeService implements Services.ServiceInstance {
 		verifySupportedPlatform(this.platformName);
 	}
 
-	async before(_capabilities: never, _specs: never, browser: WebdriverIO.Browser) {
-		browser.X = XBridge;
+	async before(_capabilities: never, _specs: never, driver: WebdriverIO.Browser) {
+		driver.addCommand("$X", (selector: Selector) => new Locator(selector));
 	}
 }

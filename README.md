@@ -1,6 +1,6 @@
 # wdio-xbridge-service
 
-[![npm](https://img.shields.io/npm/v/wdio-xbridge-service.svg)](https://www.npmjs.com/package/wdio-xbridge-service) [![CI](https://img.shields.io/github/actions/workflow/status/lucashnvarela/wdio-xbridge-service/test.yaml)](https://github.com/lucashnvarela/wdio-xbridge-service/actions/workflows/test.yaml) [![semantic-release](https://img.shields.io/badge/semantic--release-angular-e10079)](.releaserc)
+[![npm](https://img.shields.io/npm/v/wdio-xbridge-service.svg)](https://www.npmjs.com/package/wdio-xbridge-service) [![CI](https://img.shields.io/github/actions/workflow/status/lucashnvarela/wdio-xbridge-service/test.yaml)](https://github.com/lucashnvarela/wdio-xbridge-service/actions/workflows/test.yaml)
 
 #### A WebdriverIO service with a cross-platform selector API for iOS and Android automation.
 
@@ -53,17 +53,17 @@ For the complete list of supported selectors and navigation methods, see the [AP
 Selectors can target a node, an attribute, or both: `<node>`, `<attribute>="<value>"`, `<node>[<attribute>="<value>"]`
 
 ```typescript
-const submit = driver.X('button')
-const input = driver.X('input[label="Username"]')
-const hint = driver.X('label="Username"')
+const submit = driver.$X('button')
+const input = driver.$X('input[label="Username"]')
+const hint = driver.$X('[label="Username"]')
 ```
 
 **Cross-platform selectors** — pass a tuple of two selectors to target both platforms, and the correct selector is resolved at runtime:
 
 ```typescript
-const username = driver.X([
+const username = driver.$X([
   'input[label="Username"]',  // iOS
-  'input[text="Username"]',   // Android
+  'input[description="Username"]',   // Android
 ])
 ```
 
@@ -72,7 +72,7 @@ const username = driver.X([
 Navigate the element tree relative to the previous selector using `.ancestor`, `.descendant`, `.parent`, `.child`, `.previous`, and `.next`. All methods accept an optional selector and are chainable:
 
 ```typescript
-driver.X('label="Profile"')
+driver.$X('[label="Profile"]')
   .parent()
   .descendant('text[name="Edit"]')
   .next('button')
@@ -81,20 +81,7 @@ driver.X('label="Profile"')
 **Platform scoping** — chain `.ios` or `.android` before any navigation method to apply it only on that specific platform:
 
 ```typescript
-driver.X(['text[name="Settings"]', 'text[description="Settings"]'])
+driver.$X(['[name="Settings"]', '[description="Settings"]'])
   .ios.parent('window[name="settings-row"]')
   .android.ancestor('frame[resourceId="settings-section"]')
-```
-
-### Actions
-
-```typescript
-await driver.X('button[name="Edit"]').click()
-await driver.X('label="Username"').fill('wdio@example.com')
-```
-
-**Swipe into view** — chain `.swipe` to automatically scroll the element into the view before interacting:
-
-```typescript
-await driver.X('button').swipe.click()
 ```

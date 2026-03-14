@@ -14,20 +14,21 @@
 		"wdio",
 		"wdio-service"
 	],
-	"type": "module",
-	"main": "./build/index.js",
-	"types": "./build/index.d.ts",
 	"scripts": {
 		"build": "tsc --build",
 		"clean": "rm -rf ./build",
-		"test": "vitest --run",
-		"lint": "biome check ."
+		"test": "vitest run",
+		"coverage": "vitest run --coverage",
+		"lint": "biome check"
 	},
+	"type": "module",
+	"main": "./build/index.js",
+	"types": "./build/index.d.ts",
 	"engines": {
-		"node": ">=24",
-		"pnpm": ">=10"
+		"node": ">=20"
 	},
 	"peerDependencies": {
+		"@wdio/globals": "^9.0.0",
 		"@wdio/types": "^9.0.0",
 		"webdriverio": "^9.0.0"
 	},
