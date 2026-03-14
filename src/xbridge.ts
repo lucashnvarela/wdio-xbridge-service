@@ -72,8 +72,8 @@ type IOSSelector =
 
 type AndroidSelector =
 	| `${keyof typeof AndroidNode}`
-	| `${keyof typeof AndroidPredicates}="${string}"`
-	| `${keyof typeof AndroidPredicates}='${string}'`
+	| `[${keyof typeof AndroidPredicates}="${string}"]`
+	| `[${keyof typeof AndroidPredicates}='${string}']`
 	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}="${string}"]`
 	| `${keyof typeof AndroidNode}[${keyof typeof AndroidPredicates}='${string}']`;
 
@@ -110,7 +110,7 @@ class XBridgeServiceError extends Error {
 	}
 }
 
-function verifySupportedPlatform(platformName: string) {
+function verifySupportedPlatform(platformName: string): asserts platformName is PlatformName {
 	if (!Object.values<string>(PlatformName).includes(platformName)) {
 		throw new XBridgeServiceError({
 			name: Exception.UnknownPlatform,
