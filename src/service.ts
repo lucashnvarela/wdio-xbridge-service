@@ -14,6 +14,6 @@ export default class XBridgeService implements Services.ServiceInstance {
 	}
 
 	async before(_capabilities: never, _specs: never, driver: WebdriverIO.Browser) {
-		driver.X = (selector: Selector) => new Locator(selector);
+		driver.addCommand("$X", (selector: Selector) => new Locator(selector));
 	}
 }
