@@ -46,8 +46,6 @@ To enable type support, add `wdio-xbridge-service` to your `tsconfig.json`:
 
 ## Usage
 
-For the complete list of supported selectors and navigation methods, see the [API reference](docs/usage.md).
-
 ### Selectors
 
 Selectors can target a node, an attribute, or both: `<node>`, `<attribute>="<value>"`, `<node>[<attribute>="<value>"]`
