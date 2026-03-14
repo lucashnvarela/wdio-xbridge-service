@@ -65,8 +65,8 @@ enum AndroidPredicates {
 
 type IOSSelector =
 	| `${keyof typeof IOSNode}`
-	| `${keyof typeof IOSPredicates}="${string}"`
-	| `${keyof typeof IOSPredicates}='${string}'`
+	| `[${keyof typeof IOSPredicates}="${string}"]`
+	| `[${keyof typeof IOSPredicates}='${string}']`
 	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}="${string}"]`
 	| `${keyof typeof IOSNode}[${keyof typeof IOSPredicates}='${string}']`;
 
@@ -120,12 +120,7 @@ function verifySupportedPlatform(platformName: string): asserts platformName is 
 }
 
 class XPathConstructor {
-	private readonly NODE_PATTERN = /^(?<node>\w+)$/;
-	private readonly ATTR_PATTERN = /^(?<attr>\w+)=['"](?<value>.+)['"]$/;
-	private readonly NODE_ATTR_PATTERN = /^(?<node>\w+)\[(?<attr>\w+)=['"](?<value>.+)['"]\]$/;
-	private readonly SELECTOR_PATTERN = new RegExp(
-		`^(?:${this.NODE_PATTERN.source}|${this.ATTR_PATTERN.source}|${this.NODE_ATTR_PATTERN.source})$`,
-	);
+	private readonly SELECTOR_PATTERN = /^(?<node>\w+)?(?:\[(?<attr>\w+)=['"](?<value>.+)['"]\])?$/;
 
 	private context?: string;
 	private axis?: NavigationAxis;
