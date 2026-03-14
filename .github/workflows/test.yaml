@@ -1,36 +1,52 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: pull_request
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          version: 10
-      - uses: actions/setup-node@v6
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install
-      - run: pnpm run lint
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm run lint
 
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v4
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
-          version: 10
-      - uses: actions/setup-node@v6
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install
-      - run: pnpm run test --reporter=github-actions
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test
+        run: pnpm run test --reporter=github-actions
