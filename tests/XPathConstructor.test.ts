@@ -12,13 +12,13 @@ describe("simple selector", () => {
 		});
 
 		it("builds selector with label", () => {
-			const xpath = new XPathConstructor({ selector: 'label="Add to cart"' });
+			const xpath = new XPathConstructor({ selector: '[label="Add to cart"]' });
 			expect(xpath.selector).toBe('//*[@label="Add to cart"]');
 		});
 
 		it("builds selector with labelContains", () => {
 			const xpath = new XPathConstructor({
-				selector: 'labelContains="Add"',
+				selector: '[labelContains="Add"]',
 			});
 			expect(xpath.selector).toBe('//*[contains(@label, "Add")]');
 		});
@@ -34,12 +34,12 @@ describe("simple selector", () => {
 		});
 
 		it("builds selector with text", () => {
-			const xpath = new XPathConstructor({ selector: 'text="Add to cart"' });
+			const xpath = new XPathConstructor({ selector: '[text="Add to cart"]' });
 			expect(xpath.selector).toBe('//*[@text="Add to cart"]');
 		});
 
 		it("builds selector with textContains", () => {
-			const xpath = new XPathConstructor({ selector: 'textContains="Add"' });
+			const xpath = new XPathConstructor({ selector: '[textContains="Add"]' });
 			expect(xpath.selector).toBe('//*[contains(@text, "Add")]');
 		});
 	});
@@ -172,12 +172,12 @@ describe("values with spaces", () => {
 		});
 
 		it("builds selector with multi-word value", () => {
-			const xpath = new XPathConstructor({ selector: 'label="Sign In"' });
+			const xpath = new XPathConstructor({ selector: '[label="Sign In"]' });
 			expect(xpath.selector).toBe('//*[@label="Sign In"]');
 		});
 
 		it("builds selector with multi-word value using single quotes", () => {
-			const xpath = new XPathConstructor({ selector: "label='Sign In'" });
+			const xpath = new XPathConstructor({ selector: "[label='Sign In']" });
 			expect(xpath.selector).toBe('//*[@label="Sign In"]');
 		});
 	});
@@ -192,12 +192,12 @@ describe("values with spaces", () => {
 		});
 
 		it("builds selector with multi-word value", () => {
-			const xpath = new XPathConstructor({ selector: 'text="Sign In"' });
+			const xpath = new XPathConstructor({ selector: '[text="Sign In"]' });
 			expect(xpath.selector).toBe('//*[@text="Sign In"]');
 		});
 
 		it("builds selector with multi-word value using single quotes", () => {
-			const xpath = new XPathConstructor({ selector: "text='Sign In'" });
+			const xpath = new XPathConstructor({ selector: "[text='Sign In']" });
 			expect(xpath.selector).toBe('//*[@text="Sign In"]');
 		});
 	});
@@ -215,14 +215,14 @@ describe("array selector", () => {
 
 		it("builds selector with label, ignores text", () => {
 			const xpath = new XPathConstructor({
-				selector: ['label="Add to cart"', 'text="Add to cart"'],
+				selector: ['[label="Add to cart"]', '[text="Add to cart"]'],
 			});
 			expect(xpath.selector).toBe('//*[@label="Add to cart"]');
 		});
 
 		it("builds selector with name, ignores resourceId", () => {
 			const xpath = new XPathConstructor({
-				selector: ['name="productTitle"', 'resourceId="productTitle"'],
+				selector: ['[name="productTitle"]', '[resourceId="productTitle"]'],
 			});
 			expect(xpath.selector).toBe('//*[@name="productTitle"]');
 		});
@@ -253,14 +253,14 @@ describe("array selector", () => {
 
 		it("builds selector with text, ignores label", () => {
 			const xpath = new XPathConstructor({
-				selector: ['label="Add to cart"', 'text="Add to cart"'],
+				selector: ['[label="Add to cart"]', '[text="Add to cart"]'],
 			});
 			expect(xpath.selector).toBe('//*[@text="Add to cart"]');
 		});
 
 		it("builds selector with resourceId, ignores name", () => {
 			const xpath = new XPathConstructor({
-				selector: ['name="productTitle"', 'resourceId="productTitle"'],
+				selector: ['[name="productTitle"]', '[resourceId="productTitle"]'],
 			});
 			expect(xpath.selector).toBe('//*[@resource-id="productTitle"]');
 		});
@@ -298,7 +298,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Descendant,
-					selector: 'label="Add to cart"',
+					selector: '[label="Add to cart"]',
 				});
 				expect(xpath.selector).toBe(
 					'//XCUIElementTypeButton[@label="Add to cart"]/descendant::*[@label="Add to cart"]',
@@ -309,7 +309,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Ancestor,
-					selector: 'label="Product details"',
+					selector: '[label="Product details"]',
 				});
 				expect(xpath.selector).toBe(
 					'//XCUIElementTypeButton[@label="Add to cart"]/ancestor::*[@label="Product details"]',
@@ -320,7 +320,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Parent,
-					selector: 'label="Product details"',
+					selector: '[label="Product details"]',
 				});
 				expect(xpath.selector).toBe(
 					'//XCUIElementTypeButton[@label="Add to cart"]/parent::*[@label="Product details"]',
@@ -331,7 +331,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Child,
-					selector: 'label="Add to cart"',
+					selector: '[label="Add to cart"]',
 				});
 				expect(xpath.selector).toBe('//XCUIElementTypeButton[@label="Add to cart"]/child::*[@label="Add to cart"]');
 			});
@@ -340,7 +340,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Preceding,
-					selector: 'label="Wishlist"',
+					selector: '[label="Wishlist"]',
 				});
 				expect(xpath.selector).toBe(
 					'//XCUIElementTypeButton[@label="Add to cart"]/preceding-sibling::*[@label="Wishlist"]',
@@ -351,7 +351,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Following,
-					selector: 'label="Buy now"',
+					selector: '[label="Buy now"]',
 				});
 				expect(xpath.selector).toBe(
 					'//XCUIElementTypeButton[@label="Add to cart"]/following-sibling::*[@label="Buy now"]',
@@ -374,7 +374,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Descendant,
-					selector: 'text="Add to cart"',
+					selector: '[text="Add to cart"]',
 				});
 				expect(xpath.selector).toBe('//android.widget.Button[@text="Add to cart"]/descendant::*[@text="Add to cart"]');
 			});
@@ -383,7 +383,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Ancestor,
-					selector: 'description="Product details"',
+					selector: '[description="Product details"]',
 				});
 				expect(xpath.selector).toBe(
 					'//android.widget.Button[@text="Add to cart"]/ancestor::*[@content-desc="Product details"]',
@@ -394,7 +394,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Parent,
-					selector: 'description="Product details"',
+					selector: '[description="Product details"]',
 				});
 				expect(xpath.selector).toBe(
 					'//android.widget.Button[@text="Add to cart"]/parent::*[@content-desc="Product details"]',
@@ -405,7 +405,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Child,
-					selector: 'text="Add to cart"',
+					selector: '[text="Add to cart"]',
 				});
 				expect(xpath.selector).toBe('//android.widget.Button[@text="Add to cart"]/child::*[@text="Add to cart"]');
 			});
@@ -414,7 +414,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Preceding,
-					selector: 'text="Wishlist"',
+					selector: '[text="Wishlist"]',
 				});
 				expect(xpath.selector).toBe(
 					'//android.widget.Button[@text="Add to cart"]/preceding-sibling::*[@text="Wishlist"]',
@@ -425,7 +425,7 @@ describe("navigation axis", () => {
 				const xpath = new XPathConstructor({
 					context,
 					axis: NavigationAxis.Following,
-					selector: 'text="Buy now"',
+					selector: '[text="Buy now"]',
 				});
 				expect(xpath.selector).toBe(
 					'//android.widget.Button[@text="Add to cart"]/following-sibling::*[@text="Buy now"]',
@@ -835,27 +835,33 @@ describe("error cases", () => {
 			});
 		});
 
-		it("throws InvalidSelectorError when selector is empty", () => {
+		it("throws SelectorRequiredError when selector is empty", () => {
 			expect(() => new XPathConstructor({ selector: "" as Selector })).toThrowError(
-				expect.objectContaining({ name: Exception.InvalidSelector }),
-			);
-		});
-
-		it("throws InvalidSelectorError when selector format is invalid", () => {
-			expect(() => new XPathConstructor({ selector: "not-valid" as Selector })).toThrowError(
-				expect.objectContaining({ name: Exception.InvalidSelector }),
+				expect.objectContaining({ name: Exception.SelectorRequired }),
 			);
 		});
 
 		it("throws SelectorRequiredError when selector for the current platform is not provided", () => {
-			expect(() => new XPathConstructor({ selector: 'description="Login"' as Selector })).toThrowError(
+			expect(() => new XPathConstructor({ selector: '[description="Login"]' as Selector })).toThrowError(
 				expect.objectContaining({ name: Exception.SelectorRequired }),
+			);
+		});
+
+		it("throws InvalidNodeError for an invalid node name", () => {
+			expect(() => new XPathConstructor({ selector: "badNode" as Selector })).toThrowError(
+				expect.objectContaining({ name: Exception.InvalidNode }),
 			);
 		});
 
 		it("throws InvalidNodeError for an invalid node", () => {
 			expect(() => new XPathConstructor({ selector: 'badNode[label="Login"]' as Selector })).toThrowError(
 				expect.objectContaining({ name: Exception.InvalidNode }),
+			);
+		});
+
+		it("throws InvalidAttributeError for an invalid attribute", () => {
+			expect(() => new XPathConstructor({ selector: '[badAttr="Login"]' as Selector })).toThrowError(
+				expect.objectContaining({ name: Exception.InvalidAttribute }),
 			);
 		});
 
@@ -875,27 +881,33 @@ describe("error cases", () => {
 			});
 		});
 
-		it("throws InvalidSelectorError when selector is empty", () => {
+		it("throws SelectorRequiredError when selector is empty", () => {
 			expect(() => new XPathConstructor({ selector: "" as Selector })).toThrowError(
-				expect.objectContaining({ name: Exception.InvalidSelector }),
-			);
-		});
-
-		it("throws InvalidSelectorError when selector format is invalid", () => {
-			expect(() => new XPathConstructor({ selector: "not-valid" as Selector })).toThrowError(
-				expect.objectContaining({ name: Exception.InvalidSelector }),
+				expect.objectContaining({ name: Exception.SelectorRequired }),
 			);
 		});
 
 		it("throws SelectorRequiredError when selector for the current platform is not provided", () => {
-			expect(() => new XPathConstructor({ selector: 'label="Login"' as Selector })).toThrowError(
+			expect(() => new XPathConstructor({ selector: '[label="Login"]' as Selector })).toThrowError(
 				expect.objectContaining({ name: Exception.SelectorRequired }),
+			);
+		});
+
+		it("throws InvalidNodeError for an invalid node name", () => {
+			expect(() => new XPathConstructor({ selector: "badNode" as Selector })).toThrowError(
+				expect.objectContaining({ name: Exception.InvalidNode }),
 			);
 		});
 
 		it("throws InvalidNodeError for an invalid node", () => {
 			expect(() => new XPathConstructor({ selector: 'badNode[text="Login"]' as Selector })).toThrowError(
 				expect.objectContaining({ name: Exception.InvalidNode }),
+			);
+		});
+
+		it("throws InvalidAttributeError for an invalid attribute", () => {
+			expect(() => new XPathConstructor({ selector: '[badAttr="Login"]' as Selector })).toThrowError(
+				expect.objectContaining({ name: Exception.InvalidAttribute }),
 			);
 		});
 
