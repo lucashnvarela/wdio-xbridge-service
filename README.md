@@ -46,30 +46,30 @@ To enable type support, add `wdio-xbridge-service` to your `tsconfig.json`:
 
 ## Usage
 
-For the complete list of supported selectors and navigation methods, see the [API reference](docs/usage.md).
-
 ### Selectors
 
-Selectors can target a node, an attribute, or both: `<node>`, `<attribute>="<value>"`, `<node>[<attribute>="<value>"]`
+Selectors support the following syntax:
 
 ```typescript
-const submit = driver.$X('button')
-const input = driver.$X('input[label="Username"]')
-const hint = driver.$X('[label="Username"]')
+driver.$X('<node>')                         // e.g. `input`
+driver.$X('[<attribute>="<value>"]')        // e.g. `[label="Welcome"]`
+driver.$X('<node>[<attribute>="<value>"]')  // e.g. `button[name="sign-in"]`
 ```
 
-**Cross-platform selectors** — pass a tuple of two selectors to target both platforms, and the correct selector is resolved at runtime:
+**Platform nodes and attributes** — [XCUITest](https://github.com/appium/appium-xcuitest-driver) and [UIAutomator2](https://github.com/appium/appium-uiautomator2-driver) expose different node types and attributes. Refer to each platform's documentation for the full list.
+
+**Unified selector** — pass a pair of selectors to target the same element on both platforms, and the correct one is resolved at runtime:
 
 ```typescript
 const username = driver.$X([
-  'input[label="Username"]',  // iOS
-  'input[description="Username"]',   // Android
+  'input[label="Username"]',        // iOS
+  'input[description="Username"]',  // Android
 ])
 ```
 
 ### Navigation
 
-Navigate the element tree relative to the previous selector using `.ancestor`, `.descendant`, `.parent`, `.child`, `.previous`, and `.next`. All methods accept an optional selector and are chainable:
+Navigate relative to the previous selector using `.ancestor`, `.descendant`, `.parent`, `.child`, `.previous`, and `.next`. All methods accept an optional selector and are chainable:
 
 ```typescript
 driver.$X('[label="Profile"]')
